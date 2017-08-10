@@ -200,7 +200,7 @@ int main() {
   // start in lane 1
   int lane = 1;
   // have a reference velocity to target
-  double ref_vel = 49.5;  //mpg
+  double ref_vel = 0;  //mpg
 
   h.onMessage([&ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy, &lane]
     (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -275,7 +275,7 @@ int main() {
             }
 
             if (too_close) {
-              ref_vel -= .224;
+              ref_vel -= .224;  // 5m/sec
             } else if (ref_vel < 49.5) {
               ref_vel += .224;
             }
