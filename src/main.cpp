@@ -268,7 +268,6 @@ int main() {
                 if ((check_car_s > car_s) && ((check_car_s - car_s) < 30)) {
                   // do some logic here, lower reference velocity so we don't crash into the car infront of us, could
                   // also flag to try to change lants.
-                  ref_vel = 29.5; // mph
                   too_close = true;
                 }
               }
