@@ -250,9 +250,8 @@ int main() {
             // helpful for transitions
             int prev_size = previous_path_x.size();
 
-            // SENSOR PROCESSING
+            // *** SENSOR PROCESSING ***
 
-            // *** AVOID HITTING A CAR IN FRONT OF US ***
             if (prev_size > 0) {
               car_s = end_path_s;
             }
@@ -261,6 +260,8 @@ int main() {
             map<int, vector<vector<double>>> sensor_cars_lanes;
 
             bool too_close = sensor_processing(sensor_fusion, prev_size, car_s, lane, sensor_cars_lanes);
+
+            // *** PATH PLANNING ***
 
             if (too_close) {
               // The car should only change lanes if such a change would be safe, and also if the lane
@@ -273,6 +274,9 @@ int main() {
             if (ref_vel > 49.5) {
               ref_vel = 49.5;
             }
+
+            // *** TRAJECTORY CREATION ***
+
             // create a list of widely spaced (x,y) waypoints, evenly spaced at 30m
             // later we will interpolate these waypoints with a spline and fill it
             // in with more points that controol speed
@@ -283,37 +287,30 @@ int main() {
             // either we will reference the starting point as where the car is or at the previous path end point
             double ref_x = car_x;
             double ref_y = car_y;
+            double ref_x_prev;
+            double ref_y_prev;
             double ref_yaw = deg2rad(car_yaw);
 
+            // if previous size is almost empty, use the car as starting reference
+            // else, use the previous path's end point as starting reference
             if (prev_size < 2) {
-              // if previous size is almost empty, use the car as starting reference
-              double prev_car_x = car_x - cos(car_yaw);
-              double prev_car_y = car_y - sin(car_yaw);
-
-              ptsx.push_back(prev_car_x);
-              ptsx.push_back(car_x);
-
-              ptsy.push_back(prev_car_y);
-              ptsy.push_back(car_y);
-
+              ref_x_prev = car_x - cos(car_yaw);
+              ref_y_prev = car_y - sin(car_yaw);
             } else {
-              // use the previous path's end point as starting reference
+              ref_x_prev = previous_path_x[prev_size - 2];
+              ref_y_prev = previous_path_y[prev_size - 2];
 
               // Redefine reference state as previous path end point
               ref_x = previous_path_x[prev_size - 1];
               ref_y = previous_path_y[prev_size - 1];
-
-              double ref_x_prev = previous_path_x[prev_size - 2];
-              double ref_y_prev = previous_path_y[prev_size - 2];
               ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
-
-              // use two points that make the path tangent to the previous path's end point
-              ptsx.push_back(ref_x_prev);
-              ptsx.push_back(ref_x);
-
-              ptsy.push_back(ref_y_prev);
-              ptsy.push_back(ref_y);
             }
+            // use two points that make the path tangent to the previous path's end point
+            ptsx.push_back(ref_x_prev);
+            ptsx.push_back(ref_x);
+
+            ptsy.push_back(ref_y_prev);
+            ptsy.push_back(ref_y);
 
             // In Frenet add evenly 30m spaced points ahead of the starting reference
             vector<double> next_wp0 = getXY(car_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
@@ -328,19 +325,16 @@ int main() {
             ptsy.push_back(next_wp1[1]);
             ptsy.push_back(next_wp2[1]);
 
+            // shift car reference angle to 0 degrees
             for (int i = 0; i < ptsx.size(); i++) {
-              // shift car reference angle to 0 degrees
               double shift_x = ptsx[i] - ref_x;
               double shift_y = ptsy[i] - ref_y;
-
               ptsx[i] = (shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw));
               ptsy[i] = (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw));
             }
 
-            // create a spline
+            // create a spline and set (x,y) points to the spline
             tk::spline s;
-
-            // set (x,y) points to the spline
             s.set_points(ptsx, ptsy);
 
             // Define the actual (x,y) points we will use for the planner
