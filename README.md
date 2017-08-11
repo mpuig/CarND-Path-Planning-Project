@@ -1,8 +1,47 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
+
+### Reflections
+
+Path Planning tries to replicate the thinking and decision making the humans do while driving, and decide the optimal action based on safety, efficiency, legality and confort. This project implements a simple version of this process, in a very concrete environment: a 3 lanes highway, with randomized environment that contains other cars. The project needs to be able to drive an entire loop of 4.32 miles without conflicts like collisions, speed violation (the limit is 50mph) and acceleration (and deceleration) below 10m/s^2.
+
+The main workflow has the following steps:
+
+- Receive input data from the simulator.
+- Sensor fusion data update and processing.
+- Path planning.
+- Trajectory generator.
+- Send trajectory data to the simulator.
+
+#### Sensor fusion processing
+
+In this step, the project gets the sensor fucion data from the simulator and organizes it for future management. It basically processes the information about the other cars around the 'ego_car', calculating the corresponding lane, and saving them in a 3d vector called 'sensor_cars_lanes', where indexs are: '0->Left lane, 1->Center lane and 2->Right lane
+
+In a second step, it checks if there's a close car in the same lane.
+
+#### Path planning
+The Path planning is based on a Finite State Machine with 3 states Keep Lane, Lane Change Left, Lane Change Right When needed (the front car is too close). After a list of valid states is returned, it calculates the associated cost for each one.
+
+The cost functions used in this module are defined in `src/costs.h` and are basically two (a third one is defined, but not used in this version):
+
+- Cost function for Change Lane state: This function, makes a double check. First of all, it checks if there's a car behind us in the destination lane, below a 'collision_distance' value. If there isn't a collision risk, if looks for the closest car in front of it, and calculates a cost depending on the distance. The furthest is the car, the lower is the cost.
+
+- Cost function for Keep Lane state. It detects the closest car in front of the ego_car and it calculates the cost depending on the distance. Two buffer variables are defined to control the behavior:
+
+ - `buffer_risk` is the 'security' distance the ego_car cannot overpass. If it does, then there's danger of collision and the cost is maximum.
+ - `buffer_max` is the distance to start preventing the collision. In this case, the cost is calculated using a linear function. The closer 's' to 'buffer_max', the lower the cost, and viceversa.
+
+Finally it assigns the new lane id and corrects the speed.
+
+#### Trajectory generator
+
+In order to drive the car along the highway, the Frenet coordinate transformations are used. Frenet space is a mathematical transformation where we say `d` is the center of the road, and `s` is how far down the road we are. To do this, we need a way to transform from (x,y) to (s, d), and viceversa. In `src/main.cpp` there are two functions to do this: `getFrenet(x,y,s)` and `getXY(s,d)`
+
+This transformation makes it very easy to specify the car's lane and also the distance with other cars.
+
+At this point, we know where the car is right now, and we know wether it should do a lane change. To create a smooth and nice trajectory, we use the `src/spline.h` library, creating a list of the current position and three widely spaced (x,y) waypoints, evenly spaced at 30m. Then we interpolate them with the `s.set_points(ptsx, ptsy)` call and the trajectory is defined.
+
+
 
 ### Goals
 In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 50 m/s^3.
@@ -38,13 +77,13 @@ Here is the data provided from the Simulator to the C++ Program
 #### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+the path has processed since last time.
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-#### Previous path's end s and d values 
+#### Previous path's end s and d values
 
 ["end_path_s"] The previous list's last point's frenet s value
 
@@ -52,7 +91,7 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates.
 
 ## Details
 
@@ -82,55 +121,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
