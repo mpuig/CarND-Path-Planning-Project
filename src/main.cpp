@@ -208,7 +208,7 @@ int main() {
   string state = "KL";
 
   // have a reference velocity to target
-  double ref_vel = 0;  //mpg
+  double ref_vel = 0;  //mph
 
   h.onMessage([&ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy, &lane, &state]
     (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -263,16 +263,16 @@ int main() {
             bool too_close = sensor_processing(sensor_fusion, prev_size, car_s, lane, sensor_cars_lanes);
 
             if (too_close) {
-
               // The car should only change lanes if such a change would be safe, and also if the lane
               // change would help it move through the flow of traffic better.
-              lane = finite_state_machine(state, car_s, lane, ref_vel, sensor_cars_lanes);
-              // ref_vel -= .224;  // 5m/sec
-
+              plath_planning(state, car_s, lane, ref_vel, sensor_cars_lanes);
             } else if (ref_vel < 49.5) {
-              ref_vel += .224;
+              //TODO: calculate max acceleration to avoid jerk
+              ref_vel += 3 * .224;  // .224 mph ~ .1 m/s ~ 0.3km/h
             }
-
+            if (ref_vel > 49.5) {
+              ref_vel = 49.5;
+            }
             // create a list of widely spaced (x,y) waypoints, evenly spaced at 30m
             // later we will interpolate these waypoints with a spline and fill it
             // in with more points that controol speed

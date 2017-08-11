@@ -53,11 +53,12 @@ bool sensor_processing(vector<vector<double>> sensor_fusion,
     }
   };
 
+  /*
   system("clear");
   print_sensor_car_lanes(sensor_cars_lanes[0], "Sensor Info for Left Lane");
   print_sensor_car_lanes(sensor_cars_lanes[1], "Sensor Info for Mid Lane");
   print_sensor_car_lanes(sensor_cars_lanes[2], "Sensor Info for Right Lane");
-
+  */
   return too_close;
 }
 
