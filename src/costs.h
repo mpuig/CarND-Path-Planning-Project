@@ -36,7 +36,7 @@ int get_back_car_in_lane(double car_s, vector<vector<double>> sensor_cars_lane) 
 }
 
 // Define Cost Functions as lambdas
-double keep_lane_cost(double car_s, vector<vector<double>> sensor_cars_lane) {
+double keep_lane_cost(double car_s, vector<vector<double>> sensor_cars_lane, double &front_car_speed) {
   double cost = 0.0;
   double buffer_risk = 15.0;
   double buffer_max = 30.0;
@@ -45,6 +45,7 @@ double keep_lane_cost(double car_s, vector<vector<double>> sensor_cars_lane) {
   int front_id = get_front_car_in_lane(car_s, sensor_cars_lane);
   if (front_id > -1) {
     double sensor_s = sensor_cars_lane[front_id][1];
+    front_car_speed = sensor_cars_lane[front_id][3];
     double dist_s = sensor_s - car_s;
     if (dist_s < buffer_risk) {
       cost = 1.0; // collision

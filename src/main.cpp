@@ -265,7 +265,7 @@ int main() {
             if (too_close) {
               // The car should only change lanes if such a change would be safe, and also if the lane
               // change would help it move through the flow of traffic better.
-              plath_planning(state, car_s, lane, ref_vel, sensor_cars_lanes);
+              path_planning(state, car_s, lane, ref_vel, sensor_cars_lanes);
             } else if (ref_vel < 49.5) {
               //TODO: calculate max acceleration to avoid jerk
               ref_vel += 3 * .224;  // .224 mph ~ .1 m/s ~ 0.3km/h

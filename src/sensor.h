@@ -22,9 +22,8 @@ bool sensor_processing(vector<vector<double>> sensor_fusion,
     double sensor_speed = sqrt(sensor_vx * sensor_vx + sensor_vy * sensor_vy);
 
     sensor_s += ((double)prev_size * .02 * sensor_speed);  // if using previous points can project s value out
-    double sensor_distance = sensor_s - car_s;
 
-    vector<double> sensor_car = {sensor_id, sensor_s, sensor_d, sensor_speed, sensor_distance};
+    vector<double> sensor_car = {sensor_id, sensor_s, sensor_d, sensor_speed};
 
     if (sensor_d > 8.0) {
       sensor_cars_lanes[2].push_back(sensor_car);
