@@ -1,7 +1,16 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
 
-### Reflections
+## Goals
+In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 50 m/s^3.
+
+#### The map of the highway is in data/highway_map.txt
+Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
+
+The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
+
+
+## Reflections
 
 Path Planning tries to replicate the thinking and decision making the humans do while driving, and decide the optimal action based on safety, efficiency, legality and confort. This project implements a simple version of this process, in a very concrete environment: a 3 lanes highway, with randomized environment that contains other cars. The project needs to be able to drive an entire loop of 4.32 miles without conflicts like collisions, speed violation (the limit is 50mph) and acceleration (and deceleration) below 10m/s^2.
 
@@ -42,16 +51,10 @@ This transformation makes it very easy to specify the car's lane and also the di
 At this point, we know where the car is right now, and we know wether it should do a lane change. To create a smooth and nice trajectory, we use the `src/spline.h` library, creating a list of the current position and three widely spaced (x,y) waypoints, evenly spaced at 30m. Then we interpolate them with the `s.set_points(ptsx, ptsy)` call and the trajectory is defined.
 
 
+#### Video
+
 [![video](https://img.youtube.com/vi/UMHgZGJ24e8/0.jpg)](https://www.youtube.com/watch?v=UMHgZGJ24e8)
 
-
-### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 50 m/s^3.
-
-#### The map of the highway is in data/highway_map.txt
-Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
-
-The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
 
 ## Basic Build Instructions
 
